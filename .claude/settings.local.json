@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php -l app/Http/Controllers/Admin/ContentController.php)",
+      "Bash(php -l app/Http/Controllers/Teacher/AnalyticsController.php)",
+      "Bash(php -l app/Http/Controllers/Teacher/CourseController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/AdminCourseController.php)",
+      "Bash(php -l app/Http/Controllers/Student/StudentCourseController.php)",
+      "Bash(php -l app/Models/Course.php)",
+      "Bash(php -l app/Models/Enrollment.php)",
+      "Bash(grep -n \"use Illuminate\\\\\\\\\\\\\\\\Support\\\\\\\\\\\\\\\\Facades\\\\\\\\\\\\\\\\Cache\" c:/projects/final-proj-base/app/Http/Controllers/Admin/AdminController.php c:/projects/final-proj-base/app/Http/Controllers/Student/StudentCourseController.php)",
+      "Bash(grep -n \"use Illuminate\\\\\\\\Support\\\\\\\\Str\\\\|Str::\" c:/projects/final-proj-base/resources/views/student/courses/show.blade.php)",
+      "Bash(php -l c:/projects/final-proj-base/app/Services/ChatbotService.php)",
+      "Bash(php -l c:/projects/final-proj-base/app/Http/Controllers/Student/StudentCourseController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/ReportController.php)",
+      "Bash(php -l app/Http/Controllers/Teacher/ReportController.php)"
+    ]
+  }
+}
