@@ -70,7 +70,6 @@ It allows teachers to create courses, students to enroll and learn, and admins t
 
 * **Backend:** Laravel (PHP)
 * **Frontend:** Blade, Tailwind CSS
-* **JS Framework:** Alpine.js
 * **Database:** SQLite
 * **Version Control:** Git & GitHub
 
