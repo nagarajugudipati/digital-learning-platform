@@ -167,6 +167,95 @@ class CourseController extends Controller
         return redirect()->route('teacher.courses.show', $course)->with('success', 'Lesson added to course!');
     }
 
+    public function editLesson(Course $course, Lesson $lesson)
+    {
+        abort_if($course->teacher_id !== auth()->id(), 403);
+        abort_if($lesson->course_id !== $course->id, 403);
+
+        $lesson->load('contents');
+        return view('teacher.courses.edit-lesson', compact('course', 'lesson'));
+    }
+
+    public function updateLesson(Request $request, Course $course, Lesson $lesson)
+    {
+        abort_if($course->teacher_id !== auth()->id(), 403);
+        abort_if($lesson->course_id !== $course->id, 403);
+
+        $request->validate([
+            'title'                   => ['required', 'string', 'max:200'],
+            'description'             => ['required', 'string'],
+            'contents'                => ['required', 'array', 'min:1'],
+            'contents.*.type'         => ['required', 'in:video,pdf,image,text'],
+            'contents.*.title'        => ['nullable', 'string', 'max:200'],
+            'contents.*.content_text' => ['nullable', 'string'],
+            'contents.*.file'         => ['nullable', 'file', 'max:51200', 'mimes:pdf,mp4,webm,jpg,jpeg,png'],
+        ]);
+
+        $lesson->update([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'file_type'   => $request->contents[0]['type'] ?? $lesson->file_type,
+        ]);
+
+        // Delete explicitly removed blocks
+        if ($request->filled('deleted_ids')) {
+            foreach ($request->deleted_ids as $delId) {
+                $content = LessonContent::where('id', $delId)
+                    ->where('lesson_id', $lesson->id)
+                    ->first();
+                if ($content) {
+                    if ($content->file_path) {
+                        Storage::disk('public')->delete($content->file_path);
+                    }
+                    $content->delete();
+                }
+            }
+        }
+
+        foreach ($request->contents as $i => $block) {
+            $id = !empty($block['id']) ? (int) $block['id'] : null;
+
+            if ($id) {
+                $content = LessonContent::where('id', $id)
+                    ->where('lesson_id', $lesson->id)
+                    ->first();
+                if ($content) {
+                    $updateData = [
+                        'type'         => $block['type'],
+                        'title'        => $block['title'] ?? null,
+                        'content_text' => $block['content_text'] ?? null,
+                        'order'        => $i,
+                    ];
+                    if ($request->hasFile("contents.{$i}.file")) {
+                        if ($content->file_path) {
+                            Storage::disk('public')->delete($content->file_path);
+                        }
+                        $updateData['file_path'] = $request->file("contents.{$i}.file")
+                            ->store('lesson-contents', 'public');
+                    }
+                    $content->update($updateData);
+                }
+            } else {
+                $filePath = null;
+                if ($request->hasFile("contents.{$i}.file")) {
+                    $filePath = $request->file("contents.{$i}.file")
+                        ->store('lesson-contents', 'public');
+                }
+                LessonContent::create([
+                    'lesson_id'    => $lesson->id,
+                    'type'         => $block['type'],
+                    'title'        => $block['title'] ?? null,
+                    'file_path'    => $filePath,
+                    'content_text' => $block['content_text'] ?? null,
+                    'order'        => $i,
+                ]);
+            }
+        }
+
+        return redirect()->route('teacher.courses.show', $course)
+            ->with('success', 'Lesson updated successfully!');
+    }
+
     public function destroyLesson(Course $course, Lesson $lesson)
     {
         abort_if($course->teacher_id !== auth()->id(), 403);

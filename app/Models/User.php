@@ -41,6 +41,11 @@ class User extends Authenticatable
         return $this->status === null || $this->status === 'approved';
     }
 
+    public function courses()
+    {
+        return $this->hasMany(Course::class, 'teacher_id');
+    }
+
     public function lessons()
     {
         return $this->hasMany(Lesson::class, 'teacher_id');

@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminCourseController;
+use App\Http\Controllers\Admin\QueryController as AdminQueryController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Student\QueryController as StudentQueryController;
+use App\Http\Controllers\Teacher\QueryController as TeacherQueryController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\TeacherApprovalController;
@@ -20,6 +25,20 @@ use App\Http\Controllers\Teacher\ProfileController as TeacherProfileController;
 use App\Http\Controllers\Teacher\QuizController;
 use App\Http\Controllers\Teacher\ReportController as TeacherReportController;
 use Illuminate\Support\Facades\Route;
+
+// ── Language Switch ──────────────────────────────────────────────────────────
+Route::post('/language/switch', function (\Illuminate\Http\Request $request) {
+    $locale = $request->input('locale');
+    if (in_array($locale, ['en', 'hi', 'pa'])) {
+        session(['locale' => $locale]);
+    }
+    return back();
+})->name('language.switch');
+
+// ── Course Search (AJAX) ──────────────────────────────────────────────────────
+Route::get('/search/courses', [SearchController::class, 'courses'])
+    ->name('search.courses')
+    ->middleware('auth');
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -82,6 +101,10 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
     Route::post('/chatbot/chat', [ChatbotController::class, 'chat'])->name('chatbot.chat');
     Route::post('/chatbot/feedback/{log}', [ChatbotController::class, 'feedback'])->name('chatbot.feedback');
+
+    // Queries
+    Route::get('/queries', [StudentQueryController::class, 'index'])->name('queries');
+    Route::post('/queries', [StudentQueryController::class, 'store'])->name('queries.store');
 });
 
 // Teacher Routes
@@ -142,6 +165,14 @@ Route::middleware(['auth', 'role:teacher'])->prefix('teacher')->name('teacher.')
     Route::get('/courses/{course}/add-lesson', [CourseController::class, 'addLesson'])->name('courses.add-lesson');
     Route::post('/courses/{course}/add-lesson', [CourseController::class, 'storeLesson'])->name('courses.store-lesson');
     Route::delete('/courses/{course}/lessons/{lesson}', [CourseController::class, 'destroyLesson'])->name('courses.destroy-lesson');
+
+    // Lesson edit (inside course context)
+    Route::get('/courses/{course}/lessons/{lesson}/edit', [CourseController::class, 'editLesson'])->name('courses.edit-lesson');
+    Route::put('/courses/{course}/lessons/{lesson}', [CourseController::class, 'updateLesson'])->name('courses.update-lesson');
+
+    // Queries
+    Route::get('/queries', [TeacherQueryController::class, 'index'])->name('queries');
+    Route::put('/queries/{query}/reply', [TeacherQueryController::class, 'reply'])->name('queries.reply');
 });
 
 // Admin Routes
@@ -150,6 +181,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Reports
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports');
+
+    // Analytics drill-down
+    Route::get('/teachers-analytics', [AdminAnalyticsController::class, 'teachersAnalytics'])->name('teachers-analytics');
+    Route::get('/students-analytics', [AdminAnalyticsController::class, 'studentsAnalytics'])->name('students-analytics');
 
     // Teacher approval
     Route::get('/teachers', [TeacherApprovalController::class, 'index'])->name('teachers');
@@ -181,4 +216,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/courses/{course}/approve', [AdminCourseController::class, 'approve'])->name('courses.approve');
     Route::patch('/courses/{course}/reject', [AdminCourseController::class, 'reject'])->name('courses.reject');
     Route::delete('/courses/{course}', [AdminCourseController::class, 'destroy'])->name('courses.destroy');
+
+    // Queries
+    Route::get('/queries', [AdminQueryController::class, 'index'])->name('queries');
+    Route::put('/queries/{query}/reply', [AdminQueryController::class, 'reply'])->name('queries.reply');
 });

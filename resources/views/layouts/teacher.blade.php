@@ -10,16 +10,32 @@
                         Menu
                     </button>
                     <div>
-                        <span class="font-bold text-lg hidden sm:block">Nabha Digital Learning</span>
-                        <span class="text-xs text-emerald-200 hidden sm:block">Teacher Portal</span>
+                        <span class="font-bold text-lg hidden sm:block">{{ __('messages.app_name') }}</span>
+                        <span class="text-xs text-emerald-200 hidden sm:block">{{ __('messages.portal.teacher') }}</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <span class="text-sm text-emerald-200 hidden md:block">{{ auth()->user()->name }}</span>
+
+                    {{-- Language Switcher --}}
+                    <div class="flex items-center gap-0.5 bg-emerald-800/60 rounded-lg px-1 py-1">
+                        @foreach(['en' => 'EN', 'hi' => 'हि', 'pa' => 'ਪੰ'] as $code => $label)
+                            <form method="POST" action="{{ route('language.switch') }}">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $code }}">
+                                <button type="submit"
+                                        class="px-2 py-0.5 rounded text-xs font-bold transition
+                                               {{ app()->getLocale() === $code ? 'bg-white text-emerald-700 shadow' : 'text-emerald-200 hover:text-white' }}">
+                                    {{ $label }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg transition">
-                            Logout
+                            {{ __('messages.nav.logout') }}
                         </button>
                     </form>
                 </div>
@@ -41,18 +57,19 @@
                 <nav class="space-y-1">
                     @php
                         $links = [
-                            ['route' => 'teacher.dashboard',        'label' => 'Dashboard'],
-                            ['route' => 'teacher.lessons',          'label' => 'My Lessons'],
-                            ['route' => 'teacher.lessons.create',   'label' => 'Upload Lesson'],
-                            ['route' => 'teacher.quizzes',          'label' => 'My Quizzes'],
-                            ['route' => 'teacher.quizzes.create',   'label' => 'Create Quiz'],
-                            ['route' => 'teacher.analytics',        'label' => 'Analytics'],
-                            ['route' => 'teacher.student.progress', 'label' => 'Student Progress'],
-                            ['route' => 'teacher.reports',          'label' => 'Reports'],
-                            ['route' => 'teacher.courses',          'label' => 'My Courses'],
-                            ['route' => 'teacher.courses.create',   'label' => 'Create Course'],
-                            ['route' => 'teacher.chatbot-qa',       'label' => 'Chatbot Training'],
-                            ['route' => 'teacher.profile',          'label' => 'My Profile'],
+                            ['route' => 'teacher.dashboard',        'label' => __('messages.nav.dashboard')],
+                            ['route' => 'teacher.lessons',          'label' => __('messages.nav.my_lessons')],
+                            ['route' => 'teacher.lessons.create',   'label' => __('messages.nav.upload_lesson')],
+                            ['route' => 'teacher.quizzes',          'label' => __('messages.nav.my_quizzes')],
+                            ['route' => 'teacher.quizzes.create',   'label' => __('messages.nav.create_quiz')],
+                            ['route' => 'teacher.analytics',        'label' => __('messages.nav.analytics')],
+                            ['route' => 'teacher.student.progress', 'label' => __('messages.nav.student_progress')],
+                            ['route' => 'teacher.reports',          'label' => __('messages.nav.reports')],
+                            ['route' => 'teacher.courses',          'label' => __('messages.nav.my_courses_t')],
+                            ['route' => 'teacher.courses.create',   'label' => __('messages.nav.create_course')],
+                            ['route' => 'teacher.chatbot-qa',       'label' => __('messages.nav.chatbot_training')],
+                            ['route' => 'teacher.queries',          'label' => __('messages.nav.student_queries')],
+                            ['route' => 'teacher.profile',          'label' => __('messages.nav.profile')],
                         ];
                     @endphp
                     @foreach($links as $link)

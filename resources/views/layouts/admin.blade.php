@@ -14,12 +14,28 @@
                         <span class="text-xs text-gray-400 hidden sm:block">Admin Panel</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="text-sm text-gray-400 hidden md:block">Admin: {{ auth()->user()->name }}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-400 hidden md:block">{{ auth()->user()->name }}</span>
+
+                    {{-- Language Switcher --}}
+                    <div class="flex items-center gap-0.5 bg-gray-700/60 rounded-lg px-1 py-1">
+                        @foreach(['en' => 'EN', 'hi' => 'हि', 'pa' => 'ਪੰ'] as $code => $label)
+                            <form method="POST" action="{{ route('language.switch') }}">
+                                @csrf
+                                <input type="hidden" name="locale" value="{{ $code }}">
+                                <button type="submit"
+                                        class="px-2 py-0.5 rounded text-xs font-bold transition
+                                               {{ app()->getLocale() === $code ? 'bg-white text-gray-800 shadow' : 'text-gray-400 hover:text-white' }}">
+                                    {{ $label }}
+                                </button>
+                            </form>
+                        @endforeach
+                    </div>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition">
-                            Logout
+                            {{ __('messages.nav.logout') }}
                         </button>
                     </form>
                 </div>
@@ -41,13 +57,16 @@
                 <nav class="space-y-1">
                     @php
                         $links = [
-                            ['route' => 'admin.dashboard',   'label' => 'Dashboard'],
-                            ['route' => 'admin.users',       'label' => 'Manage Users'],
-                            ['route' => 'admin.teachers',    'label' => 'Teacher Approvals'],
-                            ['route' => 'admin.reports',     'label' => 'Student Reports'],
-                            ['route' => 'admin.content',     'label' => 'Content Review'],
-                            ['route' => 'admin.courses',     'label' => 'Course Approval'],
-                            ['route' => 'admin.chatbot-qa',  'label' => 'Chatbot Training'],
+                            ['route' => 'admin.dashboard',            'label' => __('messages.nav.dashboard')],
+                            ['route' => 'admin.users',                'label' => __('messages.nav.manage_users')],
+                            ['route' => 'admin.teachers',             'label' => __('messages.nav.teacher_approvals')],
+                            ['route' => 'admin.teachers-analytics',   'label' => __('messages.nav.teacher_analytics')],
+                            ['route' => 'admin.students-analytics',   'label' => __('messages.nav.student_analytics')],
+                            ['route' => 'admin.reports',              'label' => __('messages.nav.student_reports')],
+                            ['route' => 'admin.content',              'label' => __('messages.nav.content_review')],
+                            ['route' => 'admin.courses',              'label' => __('messages.nav.course_approval')],
+                            ['route' => 'admin.chatbot-qa',           'label' => __('messages.nav.chatbot_training')],
+                            ['route' => 'admin.queries',              'label' => __('messages.nav.all_queries')],
                         ];
                     @endphp
                     @foreach($links as $link)

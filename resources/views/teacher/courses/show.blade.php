@@ -74,6 +74,8 @@
                                         @endif
                                     </div>
                                 </div>
+                                <a href="{{ route('teacher.courses.edit-lesson', [$course, $lesson]) }}"
+                                   class="text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 font-medium">Edit</a>
                                 <form method="POST" action="{{ route('teacher.courses.destroy-lesson', [$course, $lesson]) }}"
                                       onsubmit="return confirm('Remove this lesson?')">
                                     @csrf @method('DELETE')

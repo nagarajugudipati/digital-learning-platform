@@ -15,10 +15,49 @@
     <form method="GET" action="{{ route('student.courses') }}" data-no-loading
           class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
         <div class="flex flex-col sm:flex-row gap-3">
-            <div class="relative flex-1">
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Search courses, subjects..."
+            {{-- Live-search wrapper --}}
+            <div class="relative flex-1" x-data="courseSearch()" @click.outside="open = false">
+                <input type="text" name="search"
+                       x-model="query"
+                       @input="search()"
+                       @focus="query.length >= 3 && results.length && (open = true)"
+                       @keydown.escape="open = false"
+                       value="{{ request('search') }}"
+                       placeholder="{{ __('messages.search.placeholder') }}"
+                       autocomplete="off"
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+                {{-- Spinner --}}
+                <div x-show="loading" class="absolute right-3 top-2.5 text-gray-400">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                </div>
+
+                {{-- Dropdown --}}
+                <div x-show="open" x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                     class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden"
+                     x-cloak>
+                    <p class="px-4 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-50">
+                        {{ __('messages.search.suggestions') }}
+                    </p>
+                    <template x-for="r in results" :key="r.id">
+                        <a :href="r.url"
+                           class="flex items-center gap-3 px-4 py-2.5 hover:bg-indigo-50 transition-colors text-sm text-left w-full border-b border-gray-50 last:border-0">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0"></div>
+                            <div class="flex-1 min-w-0">
+                                <span class="font-medium text-gray-800 block truncate" x-text="r.title"></span>
+                                <span class="text-xs text-gray-400" x-text="r.subject + (r.teacher ? ' · ' + r.teacher : '')"></span>
+                            </div>
+                        </a>
+                    </template>
+                    <p x-show="!results.length && !loading && query.length >= 3"
+                       class="px-4 py-3 text-sm text-gray-400 text-center">
+                        {{ __('messages.search.no_results') }}
+                    </p>
+                </div>
             </div>
 
             <select name="subject"
@@ -143,4 +182,8 @@
         <div class="mt-2">{{ $courses->withQueryString()->links() }}</div>
     @endif
 </div>
+
+@push('scripts')
+@include('partials.course-search-script')
+@endpush
 @endsection
